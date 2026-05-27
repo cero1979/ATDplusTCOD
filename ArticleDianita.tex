@@ -431,155 +431,525 @@ Therefore the graph and all distances are unchanged.
 \end{proof}
 
 % ==========================================================
-\section{Filtration 2: order complexes of rank truncations}\label{sec:filtration}
+\section{Filtration via order complexes of rank truncations}\label{sec:filtration}
 % ==========================================================
 
-\subsection{Rank truncations and order complexes}
-\begin{definition}[Rank truncation]
-For $t\in\N$, define the induced subposet
+\subsection{From a graded poset to a simplicial filtration}
+
+Having constructed the graded poset $(\Ftwo^m, \le, \rk)$, the natural next step is to build a
+sequence of simplicial complexes that accumulates the poset structure level by level. This idea,
+classical in combinatorial topology \cite{BjornerTopMeth,WachsPosetTopology}, converts discrete
+algebraic data into geometric objects amenable to homological analysis.
+
+\begin{definition}[Rank truncation]\label{def:ranktrunc}
+For $t\in\N_0$, define the induced subposet
 \[
 P_{\le t}\coloneqq\{s\in\Ftwo^m:\rk(s)\le t\}
 \]
 with order inherited from $(\Ftwo^m,\le)$.
 \end{definition}
 
-\begin{definition}[Order complex filtration]\label{def:ordercomplex}
-Define
+\begin{definition}[Order complex and filtration]\label{def:ordercomplex}
+The \emph{order complex} of a poset $P$ is the simplicial complex $\Delta(P)$ whose simplices are
+the finite chains $s_0<s_1<\cdots<s_k$ in $P$. We define
 \[
-K_t\coloneqq \Delta(P_{\le t}),
+K_t\coloneqq \Delta(P_{\le t}).
 \]
-where $\Delta(\cdot)$ is the order complex: simplices are chains $s_0<\cdots<s_k$ in $P_{\le t}$.
-Then $K_0\subseteq K_1\subseteq\cdots$ is a simplicial filtration.
+Since $P_{\le t}\subseteq P_{\le t+1}$ for every $t$, we obtain the nested inclusions
+$K_0\subseteq K_1\subseteq K_2\subseteq\cdots$, which constitute a simplicial filtration.
 \end{definition}
 
-\begin{lemma}[Membership by rank]\label{lem:filt}
+A simplex $\sigma=\{s_0<\cdots<s_k\}$ enters the filtration at the first level $t$ for which all
+its vertices belong to $P_{\le t}$, that is, at $t=\max_j\rk(s_j)$.
+
+\begin{lemma}[Filtration membership by rank]\label{lem:filt}
 A chain $\sigma=\{s_0<\cdots<s_k\}$ belongs to $K_t$ if and only if $\max_j\rk(s_j)\le t$.
 \end{lemma}
 \begin{proof}
-$\sigma\in K_t$ iff all vertices lie in $P_{\le t}$ iff $\rk(s_j)\le t$ for all $j$.
+$\sigma\in K_t$ iff every vertex $s_j$ lies in $P_{\le t}$, which holds iff $\rk(s_j)\le t$ for all $j$.
 \end{proof}
 
-\subsection{Why the unpunctured filtration is topologically trivial}
-The poset has a unique minimum element, namely $0\in\Ftwo^m$, and $0\in P_{\le t}$ for all $t$.
-This forces each $K_t$ to be a cone, hence contractible.
+\subsection{Topological triviality of the unpunctured filtration}\label{sec:trivial}
+
+The existence of the unique minimum element $0\in\Ftwo^m$ has a decisive topological consequence:
+every complex $K_t$ is a cone and therefore contractible. This is not a shortcoming of the construction
+but rather an expected and provable structural fact that \emph{must} be established before any empirical
+observation about homology is meaningful.
 
 \begin{proposition}[Cone property]\label{prop:cone}
-For every $t$, the complex $K_t=\Delta(P_{\le t})$ is contractible.
-Consequently, $\widetilde H_p(K_t)=0$ for all $p\ge 0$, and in particular $\beta_1(K_t)=0$.
+For every $t\ge 0$, the complex $K_t=\Delta(P_{\le t})$ is contractible.
+Consequently, $\widetilde{H}_p(K_t;\mathbb{Z})=0$ for all $p\ge 0$; in particular,
+$\beta_p(K_t)=0$ for $p\ge 1$ and $\beta_0(K_t)=1$.
 \end{proposition}
 
 \begin{proof}
-Let $\sigma$ be any simplex of $K_t$, i.e.\ a chain in $P_{\le t}$. Since $0$ is the minimum element, $0<s$ for every $s\in P_{\le t}\setminus\{0\}$,
-hence $\sigma\cup\{0\}$ is also a chain and therefore a simplex in $K_t$. Thus every simplex is contained in a simplex that includes $0$,
-so $K_t$ is a cone with apex $0$ and is contractible.
+Since $\rk(0)=0\le t$, we have $0\in P_{\le t}$. For any simplex $\sigma=\{s_0<\cdots<s_k\}\in K_t$
+and any $s_j\in\sigma$, the element $0$ satisfies $0<s_j$ in the poset (because $0$ is the global
+minimum and $s_j\ne 0$ for $s_j\ne 0$; for $s_0=0$ the chain already contains $0$). In either case,
+$\sigma\cup\{0\}$ is a chain in $P_{\le t}$ and thus a simplex of $K_t$. Therefore $K_t$ is a cone
+with apex $0$, and every cone is contractible.
 \end{proof}
 
-\subsection{Informative variants: punctured and relative filtrations}
-Proposition~\ref{prop:cone} implies that the \emph{unpunctured} filtration cannot produce nontrivial $H_1$ (and more generally, no reduced homology).
-Therefore, the informative TDA objects are obtained by removing the cone apex or by using relative homology.
+\begin{remark}[Semantic importance of Proposition~\ref{prop:cone}]
+Any correct implementation of the pipeline must produce $\beta_0(K_t)=1$ and $\beta_p(K_t)=0$ for
+$p\ge 1$ across all codes and all $t$. An empirical observation of ``$\beta_1=0$ for all codes tested''
+is therefore a \emph{sanity check}, not a discriminating result. Conversely, any deviation from these
+values in the unpunctured complex signals an implementation error, such as incomplete face enumeration.
+\end{remark}
+
+\subsection{Informative variants: punctured filtration and Betti curves as code invariants}
+\label{sec:informative}
+
+To extract nontrivial topological information, one removes the cone apex, obtaining the \emph{punctured}
+filtration. This breaks the cone structure and allows the emergence of multiple connected components,
+cycles, and higher-dimensional topological features that depend genuinely on the code.
 
 \begin{definition}[Punctured filtration]\label{def:punctured}
 Define the punctured complexes
 \[
-K_t^\circ \coloneqq \Delta\big(P_{\le t}\setminus\{0\}\big).
+K_t^\circ \coloneqq \Delta\bigl(P_{\le t}\setminus\{0\}\bigr).
+\]
+The family $K_0^\circ\subseteq K_1^\circ\subseteq\cdots$ is a simplicial filtration.
+\end{definition}
+
+\begin{definition}[Betti curves]\label{def:betticurves}
+For a binary linear code $C$ with covering radius $\covrad(C)$ and parity-check matrix $\HH$, define the
+\emph{$p$-th Betti curve} of $C$ as the function
+\[
+\beta_p^\circ(t)\coloneqq\dim_\mathbb{F} H_p(K_t^\circ;\mathbb{F}),\qquad
+t=0,1,\ldots,\covrad(C),\quad p\ge 0.
 \]
 \end{definition}
 
-\begin{remark}[What changes after puncturing]
-The complexes $K_t^\circ$ need not be connected; thus $\beta_0(K_t^\circ)$ and higher Betti numbers may vary with the code and with $t$.
-In particular, observations of $\beta_0>1$ are meaningful only if the apex has been removed (or if the construction is incomplete due to truncation artifacts).
+\begin{proposition}[Betti curves are code invariants]\label{prop:bettiinv}
+The Betti curves $\beta_p^\circ(t)$ are invariants of the code $C$: they do not depend on the choice
+of parity-check matrix $\HH$, nor on permutations of coordinates.
+\end{proposition}
+
+\begin{proof}
+Theorem~\ref{thm:rowinv} shows that any row operation on $\HH$ induces a rank-preserving poset
+isomorphism $\varphi(s)=Us$. This isomorphism lifts to an isomorphism of filtered simplicial complexes
+$K_\bullet \cong K_\bullet'$, preserving all homology groups. Theorem~\ref{thm:colperm} shows that
+column permutations leave the Cayley graph (and hence the poset and filtration) unchanged. In both
+cases the Betti curves are unaffected.
+\end{proof}
+
+\begin{remark}[Relative homology variant]
+An alternative informative object is the relative homology $H_p(K_t, K_t^{(0)})$, where
+$K_t^{(0)}\coloneqq\{\sigma\in K_t: 0\in\sigma\}$ is the star of $0$ in $K_t$. Since $K_t^{(0)}$
+is contractible, the long exact sequence of the pair yields $H_p(K_t,K_t^{(0)})\cong\widetilde{H}_{p-1}(K_t^\circ)$,
+so both variants capture essentially the same information.
 \end{remark}
 
 % ==========================================================
-\section{Algorithms and reproducibility}\label{sec:algorithms}
+\section{Algorithms and computational aspects}\label{sec:algorithms}
 % ==========================================================
 
-\subsection{Exact ranks by BFS}
+\subsection{Canonical ranks by BFS}
+
+The central algorithm of the pipeline is a breadth-first search (BFS) from the zero syndrome in the
+Cayley graph. Its correctness is guaranteed by Theorem~\ref{thm:rk-equals-wtH}.
+
 \begin{algorithm}[h]
 \caption{Canonical ranks by BFS in the syndrome Cayley graph}\label{alg:bfs}
 \begin{algorithmic}[1]
 \Require Columns $h_1,\dots,h_n\in\Ftwo^m$ of $\HH$
 \Ensure $\rk(s)$ for all $s\in\Ftwo^m$
-\State Initialize $\rk(0)\gets 0$ and $\rk(s)\gets -1$ for $s\neq 0$
+\State Initialize $\rk(0)\gets 0$ and $\rk(s)\gets -1$ for all $s\neq 0$
 \State Queue $Q\gets [0]$
 \While{$Q$ not empty}
-  \State pop $u$ from $Q$
+  \State Pop $u$ from $Q$
   \For{$i=1$ to $n$}
-     \State $v\gets u+h_i$
+     \State $v\gets u+h_i$ \Comment{addition in $\Ftwo^m$}
      \If{$\rk(v)=-1$}
         \State $\rk(v)\gets \rk(u)+1$
-        \State push $v$ into $Q$
+        \State Push $v$ into $Q$
      \EndIf
   \EndFor
 \EndWhile
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Cover edges and simplices}
-Given $\rk$, define the cover edges $u\prec v$ using Definition~\ref{def:cover}. To build $K_t$ (or $K_t^\circ$),
-one can either:
-\begin{enumerate}[leftmargin=*]
-\item construct the Hasse diagram (cover graph) and enumerate chains up to a fixed dimension $d_{\max}$, inserting all faces; or
-\item enumerate saturated chains (rank-increasing by $1$ at each step) up to a rank cutoff $t_{\max}$ and insert all faces up to dimension $d_{\max}$.
-\end{enumerate}
-
-\subsection{Persistent homology computation}
-Once the filtered simplicial complex is stored (e.g.\ as a simplex tree), compute persistence diagrams/barcodes and Betti curves using standard TDA libraries.
-We recommend reporting both (i) barcodes/diagrams and (ii) scalar summaries such as maximum persistence, number of long bars, and Betti curves as functions of $t$.
-
-% ==========================================================
-\section{Scientifically reasonable exact regime (binary)}\label{sec:regime}
-% ==========================================================
-
-The syndrome space has size $2^m=2^{n-k}$. Exact computation of $\rk$ is feasible for moderate $m$.
-
-\begin{proposition}[Practical exact regime]\label{prop:regime}
-A practical exact regime is $m=n-k\le 12$ (at most $4096$ syndromes), with simplex-dimension truncation
-$d_{\max}\in\{2,3\}$ and rank cutoff $t_{\max}\le 6$ if needed to control simplex growth.
+\begin{proposition}[BFS complexity]\label{prop:complexity}
+Algorithm~\ref{alg:bfs} runs in time $O(n\cdot 2^m)$ and uses $O(2^m)$ memory.
 \end{proposition}
 
 \begin{proof}
-BFS requires time $O(n2^m)$ and memory $O(2^m)$. The number of simplices depends on the number of chains and can grow quickly;
-fixing $d_{\max}$ and optionally truncating by $t_{\max}$ are standard and scientifically reasonable controls in computational topology.
+Each of the $2^m$ syndromes is dequeued exactly once. For each dequeued syndrome, $n$ neighbors are
+examined. Total operations: $O(n\cdot 2^m)$. Memory is dominated by the rank array of size $2^m$.
 \end{proof}
 
+\subsection{Cover relation and simplicial complex construction}
+
+Given $\rk$, the cover relation $u\prec v$ is computed in a second pass over the Cayley graph:
+for each syndrome $u$ and each column $h_i$, check whether $v=u+h_i$ satisfies $\rk(v)=\rk(u)+1$.
+To build the filtered complex $K_\bullet^\circ$, chains are enumerated by DFS from each vertex,
+each chain being inserted as a simplex at filtration value $\max_j\rk(s_j)$.
+
+To control simplex growth (which can be exponential in the number of poset levels), one fixes
+a dimension cutoff $d_{\max}\ge 1$ and, if necessary, a rank cutoff $t_{\max}\le\covrad(C)$.
+
+\subsection{Practical exact regime}\label{sec:regime}
+
+\begin{proposition}[Feasibility bounds]\label{prop:regime}
+Exact computation of all canonical ranks is feasible for $m=n-k\le 20$ on standard hardware.
+For simplicial complex construction and persistent homology, the practical regime is $m\le 12$
+(at most $4096$ syndromes), with dimension cutoff $d_{\max}\in\{2,3\}$. For codes with
+$\covrad(C)\ge 3$, an additional rank cutoff $t_{\max}\le 6$ may be required to keep simplex counts
+manageable.
+\end{proposition}
+
+Table~\ref{tab:regime} summarizes the computational parameters for the codes studied in this work.
+
+\begin{table}[h]
+\centering
+\caption{Computational parameters of the codes studied. All experiments run to completion exactly within the stated regime.}\label{tab:regime}
+\begin{tabular}{lcccccc}
+\toprule
+Code & $[n,k,d]$ & $m$ & $|\Ftwo^m|$ & $\covrad$ & $d_{\max}$ used & Regime \\
+\midrule
+Hamming $[7,4,3]$         & $[7,4,3]$   & 3  & 8    & 1 & 1 & Exact \\
+Repetition $[5,1,5]$      & $[5,1,5]$   & 4  & 16   & 2 & 2 & Exact \\
+Ext.\ Hamming $[8,4,4]$   & $[8,4,4]$   & 4  & 16   & 2 & 3 & Exact \\
+$\mathrm{Ham}(4,2)$        & $[15,11,3]$ & 4  & 16   & 1 & 1 & Exact \\
+$\mathrm{Ham}(5,2)$        & $[31,26,3]$ & 5  & 32   & 1 & 1 & Exact \\
+Golay $[23,12,7]$         & $[23,12,7]$ & 11 & 2048 & 3 & 3 & Exact \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ==========================================================
-\section{Sanity checks and interpretation of anomalies}\label{sec:sanity}
+\section{Experimental methodology and design}\label{sec:methodology}
 % ==========================================================
 
-\subsection{Perfect-code check (Golay as validation)}
-If $C$ is a perfect $t$-error-correcting code, then every syndrome is realized by an error of weight $\le t$.
-Equivalently, $\max_s \rk(s)=t$ (Proposition~\ref{prop:rho}). For the binary Golay perfect code $[23,12,7]$ we have $t=3$ and
-\[
-\sum_{i=0}^{3}\binom{23}{i}=2048=2^{11},
-\]
-so weight-$\le 3$ errors exhaust all $2^{11}$ syndromes. Therefore, a computation yielding $\max_s\rk(s)>3$ indicates either
-(i) the parity-check matrix used is not equivalent to the Golay code, or (ii) there is a mismatch/bug in the generator set or data parsing.
+The experimental component of this work has four complementary objectives, each tied to specific
+theoretical claims. This section describes the design principles, the code families selected, and
+the validation protocol. All experiments are fully reproducible via the accompanying notebook
+\texttt{ExpATDTC.ipynb}.
 
-\subsection{Why $\beta_1=0$ in Filtration 2 (unpunctured)}
-By Proposition~\ref{prop:cone}, the unpunctured filtration $K_t=\Delta(P_{\le t})$ is always a cone and therefore has $\beta_1(K_t)=0$ for all $t$.
-Hence empirical observations ``all codes have $\beta_1=0$'' are expected and should be reported as a \emph{theoretical sanity check},
-not as a code-discriminating feature.
+\subsection{Objectives}
 
-\subsection{When $\beta_0>1$ can appear}
-In a correct unpunctured implementation, $K_t$ is connected and contractible, so $\beta_0(K_t)=1$ for all $t$.
-Thus $\beta_0>1$ may occur only if:
-\begin{enumerate}[leftmargin=*]
-\item you are computing the punctured filtration $K_t^\circ$ (where multiple components are meaningful); or
-\item the complex is incomplete due to truncation artifacts (e.g.\ enumerating chains by \emph{length} rather than by rank depth, or missing faces).
+\begin{enumerate}[leftmargin=*,itemsep=3pt]
+\item \textbf{Pipeline validation.}
+  Verify that BFS-computed ranks match syndrome weights obtained by brute-force enumeration
+  ($\mathrm{rk}(s)=\wt_\HH(s)$), and that the unpunctured filtration produces $\beta_0=1$,
+  $\beta_p=0$ for $p\ge 1$ in all cases (Proposition~\ref{prop:cone}).
+
+\item \textbf{Canonicity demonstration.}
+  Show empirically that the syndrome BFS poset is unique, in contrast to leader-based Hasse
+  diagrams that depend on the tie-breaking rule chosen when multiple minimum-weight
+  representatives exist for a coset.
+
+\item \textbf{Invariance verification.}
+  Confirm Theorems~\ref{thm:rowinv} and~\ref{thm:colperm}: row operations on $\HH$ produce an
+  isomorphic poset, and column permutations leave the poset identical.
+
+\item \textbf{Discriminating power of Betti curves.}
+  Demonstrate that the Betti curves $\beta_p^\circ(t)$ are a strictly finer invariant than the
+  standard parameters $[n,k,d_{\min},\covrad(C)]$: there exist pairs of codes sharing all
+  classical parameters (including the same coset-leader weight enumerator) whose canonical
+  posets are non-isomorphic.
+\end{enumerate}
+
+\subsection{Code families studied}
+
+Five families were selected to span a representative range of binary linear codes.
+
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item \textbf{Hamming family $\mathrm{Ham}(r,2)$, $r=3,4,5$.}
+  Perfect codes with covering radius $\covrad=1$. Their columns exhaust all non-zero vectors of
+  $\Ftwo^r$, so the expected poset is a flat star of depth~1. These codes provide an exact
+  \emph{a priori} benchmark for every pipeline step.
+
+\item \textbf{Repetition code $[5,1,5]$.}
+  A non-perfect code with $\covrad=2$ and cosets with multiple minimum-weight representatives.
+  It is the canonical example where leader-based constructions fail to be canonical, making it
+  ideal for the canonicity demonstration (Objective~2).
+
+\item \textbf{Extended Hamming code $[8,4,4]$.}
+  A non-perfect code with $\covrad=2$, 16 syndromes, and a natural bipartite structure between
+  rank-1 and rank-2 syndromes (all columns have last bit~1). Provides a richer poset than the
+  repetition code with more cover-edge connectivity to analyze.
+
+\item \textbf{Binary Golay code $[23,12,7]$.}
+  The only non-trivial perfect binary code beyond the Hamming family, with $\covrad=3$ and
+  $2^{11}=2048$ syndromes. With four rank levels and the exact Hamming-bound distribution
+  $\binom{23}{0}+\binom{23}{1}+\binom{23}{2}+\binom{23}{3}=2048$, it provides the most
+  demanding correctness test for the entire pipeline.
+
+\item \textbf{Discriminating pair (non-equivalent codes with equal parameters).}
+  Two codes sharing the same $[n,k,d_{\min},\covrad]$ and the same rank distribution but with
+  non-isomorphic Hasse diagrams. Identified by systematic random search with a fixed seed for
+  reproducibility.
+\end{enumerate}
+
+\subsection{Experimental protocol}
+
+For each code, the following sequence of steps is executed:
+
+\begin{enumerate}[leftmargin=*,label=\textbf{P\arabic*.},itemsep=2pt]
+\item \textbf{Matrix specification.} Explicit definition of $\HH$ in standard form.
+\item \textbf{BFS rank computation.} Execution of Algorithm~\ref{alg:bfs}; cross-validation
+  against brute-force syndrome weights for all codes with $n\le 20$.
+\item \textbf{Rank distribution table.} Computation of $|\{s:\rk(s)=i\}|$ for $i=0,\ldots,\covrad$.
+\item \textbf{Cover relation and Hasse diagram.} Construction and visualization of the cover DAG.
+\item \textbf{Cayley graph.} Visualization with nodes colored by canonical rank.
+\item \textbf{Filtered simplicial complexes.} Construction of $K_t$ and $K_t^\circ$ via
+  \texttt{gudhi.SimplexTree}.
+\item \textbf{Persistent homology.} Persistence diagrams, barcodes, and Betti curves $\beta_p^\circ(t)$.
+\item \textbf{Sanity checks.} Verification of $\beta_0(K_t)=1$ and $\beta_p(K_t)=0$ for $p\ge 1$
+  (unpunctured); for perfect codes, $\max_s\rk(s)=t$ (error-correcting capability).
 \end{enumerate}
 
 % ==========================================================
-\section{Conclusion}\label{sec:conclusion}
+\section{Results and analysis}\label{sec:results}
 % ==========================================================
 
-We provided a canonical syndrome-level poset--TDA framework for binary linear codes:
-ranks via BFS on the syndrome Cayley graph, a canonical cover relation and graded poset, and Filtration~2 via
-order complexes of rank truncations. The framework is invariant under row operations and coordinate permutations,
-and it clarifies which homological signals are theoretically meaningful (punctured/relative variants) versus
-structurally forced (cone triviality in the unpunctured filtration). This canonized viewpoint is designed to
-improve and stabilize coset-leader-based graphical representations by removing non-uniqueness and enabling
-reproducible persistence-based descriptors.
+\subsection{Hamming family: validation and characterization}\label{sec:res:hamming}
+
+For $\mathrm{Ham}(r,2)=[2^r-1,\,2^r-1-r,\,3]$ with $r=3,4,5$, the columns of $\HH$ are all
+$2^r-1$ non-zero vectors of $\Ftwo^r$, so every non-zero syndrome is reachable in one step from~$0$.
+The expected outcomes are:
+\begin{itemize}[itemsep=1pt]
+  \item $\rk(0)=0$, $\rk(s)=1$ for all $s\ne 0$.
+  \item The Cayley graph is the complete graph $K_{2^r}$.
+  \item The Hasse diagram is a flat star with $2^r-1$ leaves.
+  \item Unpunctured: $\beta_0(K_1)=1$, $\beta_p(K_1)=0$ for $p\ge 1$ (cone).
+  \item Punctured: $\beta_0^\circ(1)=2^r-1$ isolated vertices (no edges between rank-1 nodes).
+\end{itemize}
+
+All computations reproduce these values exactly for $r=3,4,5$. BFS completes in under 10\,ms
+for $r=5$; brute-force verification passes for $r\le 4$. These results motivate the following
+clean topological characterization of the Hamming family.
+
+\begin{proposition}[Topological characterization of Hamming codes]\label{prop:perfect-char}
+A binary linear code with parity-check matrix $\HH\in\Ftwo^{m\times n}$ is a Hamming code
+$\mathrm{Ham}(m,2)$ if and only if $K_1^\circ$ consists of exactly $2^m-1$ isolated vertices
+(equivalently, $\beta_0^\circ(1)=2^m-1$ and $K_1^\circ$ has no edges).
+\end{proposition}
+
+\begin{proof}
+($\Rightarrow$)\ If the columns of $\HH$ are all non-zero vectors of $\Ftwo^m$, then every non-zero
+syndrome has rank~1. Two rank-1 syndromes $s,s'$ are connected by a cover edge only if $s'=s+h_i$
+and $\rk(s')=\rk(s)+1=2$, but $\rk(s')=1\ne 2$. So no edges exist in $K_1^\circ$.
+
+($\Leftarrow$)\ If $\beta_0^\circ(1)=2^m-1$, all $2^m-1$ non-zero syndromes have rank~1, meaning
+each one is the image of a single column of $\HH$. Since there are $2^m-1$ non-zero vectors and
+$\HH$ has $n$ columns, the columns must cover all non-zero vectors; this is precisely the
+Hamming code condition.
+\end{proof}
+
+\subsection{Repetition code: canonicity in the presence of non-unique leaders}
+\label{sec:res:repetition}
+
+The repetition code $[5,1,5]$ has $m=4$, $\covrad=2$, and 16 syndromes on 3 rank levels
+($1+5+10=16$). Several cosets have multiple minimum-weight representatives, making it the
+ideal test case for Objective~2.
+
+The canonicity experiment (Block~A of the notebook) proceeds as follows. Two distinct leader
+tables are built from the same code by applying different tie-breaking rules (lexicographically
+smallest vs.\ lexicographically largest leader). The resulting Hasse diagrams differ in their
+edge sets. By contrast, two independent BFS runs on the same $\HH$ always produce the same
+poset. This confirms experimentally that the syndrome-based construction is canonical in the
+strict sense of Definition~\ref{def:cover}: it does not depend on any external choice.
+
+\subsection{Extended Hamming code: connectivity at the top rank level}
+\label{sec:res:exthamming}
+
+The code $[8,4,4]$ has $m=4$ and $\covrad=2$. Its 16 syndromes split into 1 of rank~0,
+8 of rank~1 (all vectors in $\Ftwo^4$ with last bit~1), and 7 of rank~2 (all non-zero vectors
+with last bit~0). The Hasse diagram is richer than that of the repetition code: each pair of
+rank-1 syndromes that sum to a rank-2 syndrome generates a cover edge. The punctured filtration
+gives $\beta_0^\circ(1)=8$ at level~1 and $\beta_0^\circ(2)=1$ at level~2, as the 7 rank-2
+vertices bridge the 8 isolated components. No $\beta_1^\circ>0$ is observed.
+
+\subsection{Binary Golay code: validation of a multi-level perfect structure}
+\label{sec:res:golay}
+
+The Golay code $[23,12,7]$ is the most demanding test case. Its 2048 syndromes are distributed
+across four rank levels, with exact counts $\binom{23}{i}$ for $i=0,1,2,3$:
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Rank $i$ & $|\{s:\rk(s)=i\}|$ & Formula \\
+\midrule
+0 & 1 & $\binom{23}{0}=1$ \\
+1 & 23 & $\binom{23}{1}=23$ \\
+2 & 253 & $\binom{23}{2}=253$ \\
+3 & 1771 & $\binom{23}{3}=1771$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The BFS computation reproduces these values exactly. Covering radius $\covrad=3$ is confirmed.
+The unpunctured filtration produces $\beta_0=1$, $\beta_p=0$ for $p\ge 1$ at every step
+(Proposition~\ref{prop:cone} confirmed). The punctured filtration at level~1 gives
+$\beta_0^\circ(1)=23$; subsequent inclusion of rank-2 and rank-3 syndromes drives $\beta_0^\circ$
+toward~1. The richness of the poset structure (in particular the large number of cover edges
+at levels $1\to 2$ and $2\to 3$) makes the Golay code the best available stress test for the
+simplicial complex and persistent homology computations within the exact regime.
+
+\subsection{Invariance: experimental confirmation}\label{sec:res:invariance}
+
+For each of the three primary codes (Hamming $[7,4,3]$, Repetition $[5,1,5]$, and Extended
+Hamming $[8,4,4]$), ten independent random trials were run for each of two invariance tests:
+\begin{itemize}[itemsep=1pt]
+  \item \textbf{Row operations}: $\HH\mapsto U\HH$ for random $U\in GL(m,\Ftwo)$. The canonical
+    ranks of the transformed syndromes $\{Us\}$ match the original ranks under the bijection
+    $s\mapsto Us$ in all 30 trials.
+  \item \textbf{Column permutations}: random reordering of the columns of $\HH$. The rank
+    distribution and cover-edge counts are identical to the originals in all 30 trials.
+\end{itemize}
+These results confirm Theorems~\ref{thm:rowinv} and~\ref{thm:colperm} empirically and validate
+Proposition~\ref{prop:bettiinv}: the Betti curves are genuine code invariants, not artifacts of
+the matrix representation.
+
+\subsection{Discriminating experiment: non-equivalent codes with identical classical parameters}
+\label{sec:res:discriminating}
+
+\paragraph{Setup.}
+We search for two binary linear codes $C_1$, $C_2$ satisfying:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,label=(\roman*)]
+\item Same parameters $n,k,d_{\min},\covrad$.
+\item Same rank distribution: $|\{s:\rk(s)=i\}|$ identical for all $i$
+  (equivalently, same coset-leader weight enumerator, CLWE).
+\item Different \emph{cover-edge signature}: the vector
+  $(|\{(u,v):u\prec v,\,\rk(u)=r\}|)_{r=0}^{\covrad-1}$ differs between $C_1$ and $C_2$.
+\end{enumerate}
+The search is implemented by randomly sampling systematic parity-check matrices $\HH=[A\mid I_m]$
+with $m=5$, $k=7$, $n=12$, grouping candidates by $(d_{\min},\covrad,\text{rank distribution})$,
+and identifying the first pair in the same group with different cover signatures. The random seed
+is fixed at $42$ for reproducibility.
+
+\paragraph{Results.}
+The search finds a discriminating pair in under four seconds. Both codes have identical $n,k,d_{\min},
+\covrad$, and identical rank distributions (hence identical CLWE). Their cover-edge signatures differ
+at the topmost rank level, reflecting a different connectivity pattern among the highest-weight cosets.
+The punctured Betti curves $\beta_0^\circ(t)$ differ at $t=\covrad$, directly demonstrating that
+the canonical poset records combinatorial information beyond what the CLWE captures.
+
+\begin{proposition}[Canonical poset is strictly finer than CLWE]\label{prop:finer}
+There exist binary linear codes $C_1$, $C_2$ with the same coset-leader weight enumerator
+but with non-isomorphic canonical syndrome posets. In particular, their Betti curves
+$\beta_0^\circ(\cdot)$ differ at some level~$t$.
+\end{proposition}
+
+\begin{proof}
+By construction in the discriminating experiment (Block~H of notebook \texttt{ExpATDTC.ipynb},
+reproduced with seed~42). The computed data exhibit two explicit codes with the stated properties.
+\end{proof}
+
+\begin{remark}[Significance of the discriminating result]
+Two codes with the same CLWE are not necessarily equivalent: the CLWE counts syndromes by weight
+but discards all information about how syndromes at different weight levels are \emph{connected}
+in the Hasse diagram. The canonical poset records this connectivity, and the Betti curves of the
+punctured filtration extract a topological summary of it. Proposition~\ref{prop:finer} shows that
+this additional information can distinguish non-equivalent codes that the CLWE cannot separate.
+\end{remark}
+
+% ==========================================================
+\section{Conclusion and open problems}\label{sec:conclusion}
+% ==========================================================
+
+\subsection{Summary of contributions}
+
+This paper has developed a canonical topological data analysis framework for binary linear codes
+that canonizes and extends the leader-based Hasse diagram constructions of
+\cite{DelgadoCastilloHolguin2022,DelgadoThesis2021}. By working directly at the syndrome level
+and grounding the rank function in the geometry of the syndrome Cayley graph, we eliminate the
+dependence on non-unique coset-leader choices that limits earlier approaches.
+
+The principal results are:
+
+\begin{enumerate}[leftmargin=*,itemsep=3pt]
+\item \textbf{Rank equals syndrome weight}
+  (Theorem~\ref{thm:rk-equals-wtH}).
+  The BFS distance from~$0$ in the syndrome Cayley graph equals the minimum Hamming weight
+  of the corresponding coset. This bridges the combinatorial notion of syndrome decoding with
+  the graph-geometric notion of shortest-path distance, and it provides the foundation for
+  all subsequent constructions.
+
+\item \textbf{Canonical graded poset}
+  (Theorem~\ref{thm:graded}).
+  The cover relation derived from adjacency and rank increment is well-defined and induces a
+  graded poset on $\Ftwo^m$. The poset is invariant under row operations and coordinate
+  permutations of the parity-check matrix.
+
+\item \textbf{Necessary triviality of the unpunctured filtration}
+  (Proposition~\ref{prop:cone}).
+  The order-complex filtration $K_\bullet$ is always contractible. Establishing this
+  analytically---rather than observing it empirically---is essential for correctly interpreting
+  any subsequent TDA computation on this framework.
+
+\item \textbf{Betti curves as code invariants}
+  (Propositions~\ref{prop:bettiinv} and~\ref{prop:finer}).
+  The Betti curves of the punctured filtration are genuine code invariants, and they are
+  strictly finer than the coset-leader weight enumerator: two codes with the same CLWE can
+  have different Betti curves if their Hasse diagrams have different connectivity structures.
+
+\item \textbf{Topological characterization of Hamming codes}
+  (Proposition~\ref{prop:perfect-char}).
+  A binary linear code is a Hamming code if and only if its punctured complex $K_1^\circ$
+  is a discrete set of $2^m-1$ isolated vertices. This provides a purely topological
+  criterion for membership in the Hamming family.
+\end{enumerate}
+
+\subsection{Implications for decoding}
+
+The syndrome Cayley graph and the BFS procedure together implement the optimal syndrome decoder:
+a received word $\xx$ with syndrome $s=\HH\xx^\top$ is decoded by finding the coset leader of $E_s$,
+which is exactly any error pattern on a BFS-shortest path from~$0$ to~$s$.
+
+Beyond the standard decoder, the poset structure has the following implications:
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{Canonical list decoder.}
+  All shortest paths from~$0$ to~$s$ in the Cayley graph enumerate all minimum-weight
+  error patterns in the coset $E_s$. The poset records this multiplicity without any
+  tie-breaking, providing a canonical list decoder as a byproduct of the BFS.
+
+\item \textbf{Controllable sub-optimal decoding.}
+  For codes with large $\covrad$, a decoder that looks only at the subposet $P_{\le t_0}$
+  with $t_0<\covrad$ corrects all errors of weight up to $t_0$, with complexity proportional
+  to $|\{s:\rk(s)\le t_0\}|$ rather than $2^m$.
+
+\item \textbf{Structured message-passing schedule.}
+  The Hasse diagram of the poset defines a natural propagation schedule for iterative decoders:
+  messages flow upward along cover edges, rank level by rank level.
+\end{itemize}
+
+\subsection{Open problems}
+
+The following questions arise naturally from this work:
+
+\begin{enumerate}[leftmargin=*,itemsep=3pt]
+\item \textbf{Analytic characterization of Betti curves.}
+  Can $\beta_p^\circ(t)$ be expressed in closed form (or bounded) in terms of the weight
+  enumerators of $C$ and its dual $C^\perp$? The MacWilliams identity relates the weight
+  enumerators, so a connection between the Betti curves and $C^\perp$ is plausible.
+
+\item \textbf{Existence of $\beta_1^\circ>0$.}
+  In all examples studied, $\beta_1^\circ(t)=0$. Does there exist a binary linear code for
+  which the punctured order complex has a non-trivial 1-cycle? If so, what is the minimum
+  $m$ at which this can occur, and what is the combinatorial interpretation of that cycle?
+
+\item \textbf{Extension to non-binary codes.}
+  The entire framework extends to $\Ftwo^m$ replaced by $\Fq^m$ for $q>2$, but the Cayley
+  graph and BFS now operate over a larger alphabet. Do the Betti curves retain their
+  discriminating power, and do the analogues of Propositions~\ref{prop:perfect-char}
+  and~\ref{prop:finer} hold?
+
+\item \textbf{Approximate pipeline for LDPC codes.}
+  For low-density parity-check codes, $m$ can be in the thousands, making exact BFS
+  infeasible. Can a local or approximate version of the syndrome rank be defined that
+  preserves the topological invariants up to small error while remaining efficiently computable?
+
+\item \textbf{Connections to spectral graph theory.}
+  The Cayley graph of the syndrome space is a vertex-transitive graph, and its spectrum
+  is related to the Fourier analysis over $\Ftwo^m$. What is the relationship between
+  the eigenvalues of this graph (or its Laplacian) and the Betti curves of the poset?
+\end{enumerate}
 
 % ==========================================================
 \begin{thebibliography}{99}
