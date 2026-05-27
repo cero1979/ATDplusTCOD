@@ -817,35 +817,78 @@ We search for two binary linear codes $C_1$, $C_2$ satisfying:
 \item Different \emph{cover-edge signature}: the vector
   $(|\{(u,v):u\prec v,\,\rk(u)=r\}|)_{r=0}^{\covrad-1}$ differs between $C_1$ and $C_2$.
 \end{enumerate}
-The search is implemented by randomly sampling systematic parity-check matrices $\HH=[A\mid I_m]$
-with $m=5$, $k=7$, $n=12$, grouping candidates by $(d_{\min},\covrad,\text{rank distribution})$,
-and identifying the first pair in the same group with different cover signatures. The random seed
-is fixed at $42$ for reproducibility.
+The search samples systematic parity-check matrices $\HH=[A\mid I_m]$
+with $m=5$, $k=7$, $n=12$, groups candidates by $(d_{\min},\covrad,\text{rank distribution})$,
+and identifies the first pair in the same group with different cover signatures. The seed
+is fixed at $42$ for full reproducibility; the pair is found at trials~8 and~11.
 
 \paragraph{Results.}
-The search finds a discriminating pair in under four seconds. Both codes have identical $n,k,d_{\min},
-\covrad$, and identical rank distributions (hence identical CLWE). Their cover-edge signatures differ
-at the topmost rank level, reflecting a different connectivity pattern among the highest-weight cosets.
-The punctured Betti curves $\beta_0^\circ(t)$ differ at $t=\covrad$, directly demonstrating that
-the canonical poset records combinatorial information beyond what the CLWE captures.
+The search finds a discriminating pair in $0.016$\,s.
+Both codes have identical parameters $[12,7,2,\covrad=3]$ and identical rank distribution
+$(1, 11, 19, 1)$ (hence identical CLWE). Their cover-edge signatures differ only at the
+middle level:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & $n$ & $k$ & $d_{\min}$ & $\covrad$ \\
+\midrule
+$C_1$ & 12 & 7 & 2 & 3 \\
+$C_2$ & 12 & 7 & 2 & 3 \\
+\bottomrule
+\end{tabular}
+\qquad
+\begin{tabular}{lccc}
+\toprule
+ & Level $0{\to}1$ & Level $1{\to}2$ & Level $2{\to}3$ \\
+\midrule
+$C_1$ & 11 & \textbf{80} & 11 \\
+$C_2$ & 11 & \textbf{74} & 11 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The rank-0 and rank-1 layers and all boundary conditions are identical; the difference
+lies entirely in how rank-1 syndromes connect to rank-2 syndromes (80 vs.~74 cover edges).
+
+The $\beta_0^\circ(t)$ curves are identical for both codes:
+$\beta_0^\circ(0)=0,\,\beta_0^\circ(1)=11,\,\beta_0^\circ(2)=1,\,\beta_0^\circ(3)=1$.
+However, the $\beta_1^\circ(t)$ curves \emph{differ}:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & $t=0$ & $t=1$ & $t=2$ & $t=3$ \\
+\midrule
+$\beta_1^\circ(t)$, $C_1$ & 0 & 0 & \textbf{51} & 24 \\
+$\beta_1^\circ(t)$, $C_2$ & 0 & 0 & \textbf{45} & 24 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The difference arises at level $t=2$: when the 19 rank-2 syndromes are added to the complex,
+the different number of cover edges (80 vs.~74) creates a different number of 1-cycles,
+reflecting distinct connectivity structure in the bipartite cover graph between rank-1 and rank-2 layers.
+This directly demonstrates that the canonical poset records combinatorial information beyond the CLWE.
 
 \begin{proposition}[Canonical poset is strictly finer than CLWE]\label{prop:finer}
-There exist binary linear codes $C_1$, $C_2$ with the same coset-leader weight enumerator
+There exist binary linear codes $C_1$, $C_2$ with the same classical parameters
+$[n,k,d_{\min},\covrad]$ and the same coset-leader weight enumerator
 but with non-isomorphic canonical syndrome posets. In particular, their Betti curves
-$\beta_0^\circ(\cdot)$ differ at some level~$t$.
+$\beta_1^\circ(\cdot)$ differ at some level~$t$.
 \end{proposition}
 
 \begin{proof}
-By construction in the discriminating experiment (Block~H of notebook \texttt{ExpATDTC.ipynb},
-reproduced with seed~42). The computed data exhibit two explicit codes with the stated properties.
+By the discriminating experiment (Block~H of notebook \texttt{ExpATDTC.ipynb}, seed~42).
+The codes $C_1$, $C_2$ with $[n,k,d_{\min},\covrad]=[12,7,2,3]$ and rank distribution
+$(1,11,19,1)$ satisfy: cover signatures $(11,80,11)$ vs.~$(11,74,11)$ (non-isomorphic
+Hasse diagrams); $\beta_0^\circ(t)$ identical; $\beta_1^\circ(2)=51\ne 45=\beta_1^\circ(2)$.
 \end{proof}
 
 \begin{remark}[Significance of the discriminating result]
 Two codes with the same CLWE are not necessarily equivalent: the CLWE counts syndromes by weight
 but discards all information about how syndromes at different weight levels are \emph{connected}
-in the Hasse diagram. The canonical poset records this connectivity, and the Betti curves of the
-punctured filtration extract a topological summary of it. Proposition~\ref{prop:finer} shows that
-this additional information can distinguish non-equivalent codes that the CLWE cannot separate.
+in the Hasse diagram. The canonical poset records this connectivity via the cover-edge structure.
+Remarkably, the $\beta_0^\circ(t)$ curves are identical for both codes — the discrimination is
+carried entirely by $\beta_1^\circ(t)$. This shows that 1-cycles in the punctured order complex
+are sensitive to the bipartite connectivity structure between successive rank levels, and that
+$\beta_0^\circ$ alone is an insufficiently fine invariant to capture all the information in the poset.
 \end{remark}
 
 % ==========================================================
