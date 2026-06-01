@@ -719,8 +719,25 @@ The expected outcomes are:
 \end{itemize}
 
 All computations reproduce these values exactly for $r=3,4,5$. BFS completes in under 10\,ms
-for $r=5$; brute-force verification passes for $r\le 4$. These results motivate the following
-clean topological characterization of the Hamming family.
+for $r=5$; brute-force verification passes for $r\le 4$.
+
+The computed rank distributions, cover signatures, and punctured Betti curves are:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Code & $\covrad$ & Rank dist.\ & Cover sig.\ & $\beta_0^\circ(1)$ \\
+\midrule
+$[7,4,3]$ ($r=3$) & 1 & $(1,\,7)$ & $(7)$ & 7 \\
+$[15,11,3]$ ($r=4$) & 1 & $(1,\,15)$ & $(15)$ & 15 \\
+$[31,26,3]$ ($r=5$) & 1 & $(1,\,31)$ & $(31)$ & 31 \\
+\bottomrule
+\end{tabular}
+\end{center}
+For all three codes, $\covrad=1$ implies the punctured filtration has only one active level.
+Since no cover edges exist between rank-1 syndromes (they can only connect to the
+non-existent rank-2 level), $K_1^\circ$ is a discrete point cloud: $\beta_1^\circ=0$
+and $\beta_0^\circ(1)=2^r-1$ in all cases.
+These results motivate the following clean topological characterization of the Hamming family.
 
 \begin{proposition}[Topological characterization of Hamming codes]\label{prop:perfect-char}
 A binary linear code with parity-check matrix $\HH\in\Ftwo^{m\times n}$ is a Hamming code
@@ -746,6 +763,24 @@ The repetition code $[5,1,5]$ has $m=4$, $\covrad=2$, and 16 syndromes on 3 rank
 ($1+5+10=16$). Several cosets have multiple minimum-weight representatives, making it the
 ideal test case for Objective~2.
 
+The code has rank distribution $(1,5,10)$ over $\covrad=2$ levels and cover signature $(5,20)$:
+5 edges from rank-0 to rank-1, and 20 edges from rank-1 to rank-2. The punctured Betti curves
+(computed via persistent homology with \texttt{gudhi}) are:
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Level $t$ & $\beta_0^\circ(t)$ & $\beta_1^\circ(t)$ & $\beta_2^\circ(t)$ \\
+\midrule
+1 & 5 & 0 & 0 \\
+2 & 1 & 6 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+At $t=1$, the five rank-1 syndromes form isolated vertices ($\beta_0^\circ=5$, $\beta_1^\circ=0$).
+At $t=2$, the 10 rank-2 syndromes and 20 cover edges produce a bipartite graph with
+$V=15$, $E=20$, Euler characteristic $\chi=-5$; connectivity gives $\beta_0^\circ=1$
+and $\beta_1^\circ = \beta_0^\circ - \chi = 6$.
+
 The canonicity experiment (Block~A of the notebook) proceeds as follows. Two distinct leader
 tables are built from the same code by applying different tie-breaking rules (lexicographically
 smallest vs.\ lexicographically largest leader). The resulting Hasse diagrams differ in their
@@ -758,10 +793,25 @@ strict sense of Definition~\ref{def:cover}: it does not depend on any external c
 
 The code $[8,4,4]$ has $m=4$ and $\covrad=2$. Its 16 syndromes split into 1 of rank~0,
 8 of rank~1 (all vectors in $\Ftwo^4$ with last bit~1), and 7 of rank~2 (all non-zero vectors
-with last bit~0). The Hasse diagram is richer than that of the repetition code: each pair of
-rank-1 syndromes that sum to a rank-2 syndrome generates a cover edge. The punctured filtration
-gives $\beta_0^\circ(1)=8$ at level~1 and $\beta_0^\circ(2)=1$ at level~2, as the 7 rank-2
-vertices bridge the 8 isolated components. No $\beta_1^\circ>0$ is observed.
+with last bit~0). The Hasse diagram is richer than that of the repetition code.
+The rank distribution is $(1,8,7)$ over $\covrad=2$ levels, with cover signature $(8,56)$:
+8 edges from rank-0 to rank-1, and 56 edges from rank-1 to rank-2. Since every weight-4
+codeword $\{h_a,h_b,h_c,h_d\}$ yields $h_a+h_b=h_c+h_d$ (and all three complementary pairings),
+the bipartite cover graph between the 8 rank-1 and 7 rank-2 syndromes is the complete bipartite
+graph $K_{8,7}$. The punctured Betti curves are:
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Level $t$ & $\beta_0^\circ(t)$ & $\beta_1^\circ(t)$ & $\beta_2^\circ(t)$ \\
+\midrule
+1 & 8 & 0 & 0 \\
+2 & 1 & 42 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+At $t=1$, the 8 rank-1 syndromes form isolated vertices. At $t=2$, the complete bipartite
+graph $K_{8,7}$ (with $V=15$, $E=56$, $\chi=-41$) gives $\beta_0^\circ=1$ and
+$\beta_1^\circ = 1-(-41) = 42$.
 
 \subsection{Binary Golay code: validation of a multi-level perfect structure}
 \label{sec:res:golay}
@@ -782,13 +832,29 @@ Rank $i$ & $|\{s:\rk(s)=i\}|$ & Formula \\
 \end{tabular}
 \end{center}
 
-The BFS computation reproduces these values exactly. Covering radius $\covrad=3$ is confirmed.
-The unpunctured filtration produces $\beta_0=1$, $\beta_p=0$ for $p\ge 1$ at every step
-(Proposition~\ref{prop:cone} confirmed). The punctured filtration at level~1 gives
-$\beta_0^\circ(1)=23$; subsequent inclusion of rank-2 and rank-3 syndromes drives $\beta_0^\circ$
-toward~1. The richness of the poset structure (in particular the large number of cover edges
-at levels $1\to 2$ and $2\to 3$) makes the Golay code the best available stress test for the
-simplicial complex and persistent homology computations within the exact regime.
+The BFS computation reproduces these values exactly (corrected parity-check matrix via
+systematic encoding from generator polynomial $g(x)=1+x+x^5+x^6+x^7+x^9+x^{11}$).
+Covering radius $\covrad=3$ is confirmed; the code is perfect.
+BFS runs in $\sim35$\,ms and the cover relation in $\sim40$\,ms.
+The cover signature is $(23, 506, 5313)$.
+The unpunctured filtration satisfies $\beta_0=1$, $\beta_p=0$ for $p\ge 1$
+(Proposition~\ref{prop:cone} confirmed). The punctured Betti curves are:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Level $t$ & $|\{s:\rk(s)\le t\}|$ & $\beta_0^\circ(t)$ & $\beta_1^\circ(t)$ & $\beta_2^\circ(t)$ \\
+\midrule
+1 & 23 & 23 & 0 & 0 \\
+2 & 276 & 1 & 231 & 0 \\
+3 & 2047 & 1 & 0 & 1540 \\
+\bottomrule
+\end{tabular}
+\end{center}
+At $t=2$, the bipartite cover graph (23 rank-1 nodes, 253 rank-2 nodes, 506 edges;
+$\chi = 276-506=-230$) yields $\beta_0^\circ=1$, $\beta_1^\circ=231$.
+At $t=3$, all 231 one-cycles are killed by the rank-2--to--rank-3 triangulated structure
+($\beta_1^\circ$ drops to 0), while 1540 two-dimensional cavities emerge ($\beta_2^\circ=1540$),
+reflecting the rich connectivity of the Golay code's order complex at the top level.
 
 \subsection{Invariance: experimental confirmation}\label{sec:res:invariance}
 
@@ -804,6 +870,7 @@ Hamming $[8,4,4]$), ten independent random trials were run for each of two invar
 These results confirm Theorems~\ref{thm:rowinv} and~\ref{thm:colperm} empirically and validate
 Proposition~\ref{prop:bettiinv}: the Betti curves are genuine code invariants, not artifacts of
 the matrix representation.
+All 30 trials pass for both invariance types (row operations: 30/30; column permutations: 30/30).
 
 \subsection{Discriminating experiment: non-equivalent codes with identical classical parameters}
 \label{sec:res:discriminating}
@@ -972,10 +1039,15 @@ The following questions arise naturally from this work:
   enumerators of $C$ and its dual $C^\perp$? The MacWilliams identity relates the weight
   enumerators, so a connection between the Betti curves and $C^\perp$ is plausible.
 
-\item \textbf{Existence of $\beta_1^\circ>0$.}
-  In all examples studied, $\beta_1^\circ(t)=0$. Does there exist a binary linear code for
-  which the punctured order complex has a non-trivial 1-cycle? If so, what is the minimum
-  $m$ at which this can occur, and what is the combinatorial interpretation of that cycle?
+\item \textbf{Prevalence and combinatorial interpretation of $\beta_p^\circ>0$.}
+  The experiments definitively establish that $\beta_1^\circ>0$ is the norm, not the exception:
+  every code with $\covrad\ge 2$ tested in this work has $\beta_1^\circ(2)>0$ (Repetition $[5,1,5]$:
+  $\beta_1^\circ(2)=6$; Extended Hamming $[8,4,4]$: $\beta_1^\circ(2)=42$; Golay $[23,12,7]$:
+  $\beta_1^\circ(2)=231$; discriminating codes: $\beta_1^\circ(2)\in\{51,45\}$; all 30 randomly
+  sampled $[12,6]$ codes have $\beta_1^\circ>0$). Moreover, $\beta_2^\circ>0$ also appears (Golay:
+  $\beta_2^\circ(3)=1540$). The open question is: can $\beta_p^\circ(t)$ be expressed in closed
+  form in terms of the weight enumerator or other standard invariants of $C$? Does the pattern
+  $\beta_1^\circ(t)>0$ for all $\covrad\ge 2$ hold in general?
 
 \item \textbf{Extension to non-binary codes.}
   The entire framework extends to $\Ftwo^m$ replaced by $\Fq^m$ for $q>2$, but the Cayley
