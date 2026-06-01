@@ -740,21 +740,31 @@ and $\beta_0^\circ(1)=2^r-1$ in all cases.
 These results motivate the following clean topological characterization of the Hamming family.
 
 \begin{proposition}[Topological characterization of Hamming codes]\label{prop:perfect-char}
-A binary linear code with parity-check matrix $\HH\in\Ftwo^{m\times n}$ is a Hamming code
-$\mathrm{Ham}(m,2)$ if and only if $K_1^\circ$ consists of exactly $2^m-1$ isolated vertices
-(equivalently, $\beta_0^\circ(1)=2^m-1$ and $K_1^\circ$ has no edges).
+Let $\HH\in\Ftwo^{m\times n}$ be a parity-check matrix with no zero columns and no two equal
+columns (a standard assumption in any non-degenerate code). The corresponding binary linear
+code is a Hamming code $\mathrm{Ham}(m,2)$ if and only if $K_1^\circ$ consists of exactly
+$2^m-1$ isolated vertices (equivalently, $\beta_0^\circ(1)=2^m-1$ and $K_1^\circ$ has no edges).
 \end{proposition}
 
 \begin{proof}
-($\Rightarrow$)\ If the columns of $\HH$ are all non-zero vectors of $\Ftwo^m$, then every non-zero
-syndrome has rank~1. Two rank-1 syndromes $s,s'$ are connected by a cover edge only if $s'=s+h_i$
-and $\rk(s')=\rk(s)+1=2$, but $\rk(s')=1\ne 2$. So no edges exist in $K_1^\circ$.
+($\Rightarrow$)\ If the columns of $\HH$ are all $2^m-1$ non-zero vectors of $\Ftwo^m$, every
+non-zero syndrome $s=h_i$ has rank~1. Two rank-1 syndromes $s,s'$ could only be joined by a
+cover edge $s\prec s'$ if $\rk(s')=2$, but $\rk(s')=1$. Hence $K_1^\circ$ has no edges.
 
-($\Leftarrow$)\ If $\beta_0^\circ(1)=2^m-1$, all $2^m-1$ non-zero syndromes have rank~1, meaning
-each one is the image of a single column of $\HH$. Since there are $2^m-1$ non-zero vectors and
-$\HH$ has $n$ columns, the columns must cover all non-zero vectors; this is precisely the
-Hamming code condition.
+($\Leftarrow$)\ If $\beta_0^\circ(1)=2^m-1$, all $2^m-1$ non-zero syndromes lie at rank~1.
+This means every non-zero vector $v\in\Ftwo^m$ is reachable from $0$ in one step, i.e.\ $v=h_i$
+for some column. Since $\HH$ has no zero columns and no repeated columns by assumption, each
+non-zero vector is represented exactly once: $\HH$ has $n=2^m-1$ distinct columns covering
+all non-zero vectors of $\Ftwo^m$, which is precisely the Hamming code condition.
 \end{proof}
+
+\begin{remark}
+The column conditions (no zero columns, no repeated columns) are standard in any non-trivial
+linear code, and without them the $\Leftarrow$ direction fails: a matrix with $n>2^m-1$ columns
+that still generates all non-zero syndromes in one step would give $\beta_0^\circ(1)=2^m-1$
+without being a Hamming code. Under the standard assumption, the topological condition
+$\beta_0^\circ(1)=2^m-1$ is both necessary and sufficient.
+\end{remark}
 
 \subsection{Repetition code: canonicity in the presence of non-unique leaders}
 \label{sec:res:repetition}
@@ -795,10 +805,13 @@ The code $[8,4,4]$ has $m=4$ and $\covrad=2$. Its 16 syndromes split into 1 of r
 8 of rank~1 (all vectors in $\Ftwo^4$ with last bit~1), and 7 of rank~2 (all non-zero vectors
 with last bit~0). The Hasse diagram is richer than that of the repetition code.
 The rank distribution is $(1,8,7)$ over $\covrad=2$ levels, with cover signature $(8,56)$:
-8 edges from rank-0 to rank-1, and 56 edges from rank-1 to rank-2. Since every weight-4
-codeword $\{h_a,h_b,h_c,h_d\}$ yields $h_a+h_b=h_c+h_d$ (and all three complementary pairings),
-the bipartite cover graph between the 8 rank-1 and 7 rank-2 syndromes is the complete bipartite
-graph $K_{8,7}$. The punctured Betti curves are:
+8 edges from rank-0 to rank-1, and 56 edges from rank-1 to rank-2. We claim the cover graph between the 8 rank-1 and 7 rank-2 syndromes is the \emph{complete}
+bipartite graph $K_{8,7}$. The rank-1 syndromes are exactly the vectors $(a,1)\in\Ftwo^3\times\Ftwo$
+(since each column of $\HH$ ends in~1), and the rank-2 syndromes are exactly the non-zero vectors
+$(b,0)$ with $b\in\Ftwo^3\setminus\{0\}$. For any such pair $u=(a,1)$ and $v=(b,0)$, the vector
+$h=v+u=(a+b,1)$ has last coordinate~1 and therefore equals some column of $\HH$. Since
+$\rk(v)=\rk(u)+1=2$, Definition~\ref{def:cover} gives $u\prec v$. As this holds for every
+$(u,v)$, the cover graph is indeed $K_{8,7}$. The punctured Betti curves are:
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
@@ -852,9 +865,10 @@ Level $t$ & $|\{s:\rk(s)\le t\}|$ & $\beta_0^\circ(t)$ & $\beta_1^\circ(t)$ & $\
 \end{center}
 At $t=2$, the bipartite cover graph (23 rank-1 nodes, 253 rank-2 nodes, 506 edges;
 $\chi = 276-506=-230$) yields $\beta_0^\circ=1$, $\beta_1^\circ=231$.
-At $t=3$, all 231 one-cycles are killed by the rank-2--to--rank-3 triangulated structure
-($\beta_1^\circ$ drops to 0), while 1540 two-dimensional cavities emerge ($\beta_2^\circ=1540$),
-reflecting the rich connectivity of the Golay code's order complex at the top level.
+At $t=3$, the 1771 rank-3 syndromes and their 5313 cover edges fill all 231 one-cycles
+($\beta_1^\circ$ drops to 0), while simultaneously bounding 1540 independent two-dimensional
+voids ($\beta_2^\circ=1540$). The Euler characteristic $\chi=1-0+1540=1541$ at this level
+confirms the computation.
 
 \subsection{Invariance: experimental confirmation}\label{sec:res:invariance}
 
